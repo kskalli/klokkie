@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klokkijken Leren! 🕐</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #87CEEB;
+    --sun: #FFD93D;
+    --grass: #6BCB77;
+    --coral: #FF6B6B;
+    --purple: #C77DFF;
+    --blue: #4D96FF;
+    --orange: #FF9A3C;
+    --white: #FFFDF7;
+    --dark: #3D2B1F;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(180deg, #87CEEB 0%, #B8E8FF 50%, #6BCB77 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Floating clouds */
+  .cloud {
+    position: fixed;
+    background: white;
+    border-radius: 50px;
+    opacity: 0.85;
+    animation: float linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .cloud::before, .cloud::after {
+    content: '';
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+  }
+  .cloud-1 { width: 120px; height: 40px; top: 8%; animation-duration: 25s; animation-delay: 0s; }
+  .cloud-1::before { width: 60px; height: 60px; top: -30px; left: 15px; }
+  .cloud-1::after { width: 45px; height: 45px; top: -20px; left: 55px; }
+  .cloud-2 { width: 90px; height: 30px; top: 18%; animation-duration: 35s; animation-delay: -10s; }
+  .cloud-2::before { width: 45px; height: 45px; top: -25px; left: 10px; }
+  .cloud-2::after { width: 35px; height: 35px; top: -15px; left: 40px; }
+  .cloud-3 { width: 140px; height: 45px; top: 5%; animation-duration: 40s; animation-delay: -20s; }
+  .cloud-3::before { width: 70px; height: 70px; top: -35px; left: 20px; }
+  .cloud-3::after { width: 55px; height: 55px; top: -25px; left: 65px; }
+
+  @keyframes float {
+    from { left: -200px; }
+    to { left: 110vw; }
+  }
+
+  /* Stars in background */
+  .stars-bg {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    color: var(--dark);
+    text-shadow: 3px 3px 0 rgba(255,255,255,0.6);
+    letter-spacing: 1px;
+  }
+
+  .title span { color: var(--coral); }
+
+  .score-bar {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 10px;
+    align-items: center;
+  }
+
+  .score-badge {
+    background: var(--sun);
+    border: 3px solid var(--dark);
+    border-radius: 20px;
+    padding: 6px 18px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    color: var(--dark);
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+  }
+
+  .stars-display {
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+  }
+
+  /* Mode selector */
+  .mode-selector {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .mode-btn {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    border: 3px solid var(--dark);
+    border-radius: 16px;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.25);
+    color: var(--dark);
+  }
+  .mode-btn:hover { transform: translateY(-2px); }
+  .mode-btn:active { transform: translateY(1px); box-shadow: 2px 2px 0 rgba(0,0,0,0.25); }
+  .mode-btn.active { transform: translateY(1px); box-shadow: 1px 1px 0 rgba(0,0,0,0.25); }
+
+  .mode-btn:nth-child(1) { background: #FF9A3C; }
+  .mode-btn:nth-child(2) { background: var(--purple); }
+  .mode-btn:nth-child(3) { background: var(--grass); }
+  .mode-btn:nth-child(4) { background: var(--sun); }
+  .mode-btn:nth-child(5) { background: #4D96FF; color: white; }
+
+  /* Uitleg mode */
+  .uitleg-uur-picker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .uur-nav {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.8rem;
+    background: var(--blue);
+    color: white;
+    border: 3px solid var(--dark);
+    border-radius: 14px;
+    width: 52px; height: 52px;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+    transition: transform 0.1s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .uur-nav:hover { transform: scale(1.1); }
+  .uur-nav:active { transform: scale(0.95); }
+  .uur-label {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem;
+    color: var(--dark);
+    min-width: 80px;
+    text-align: center;
+  }
+
+  .uitleg-steps {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .uitleg-step {
+    border: 3px solid var(--dark);
+    border-radius: 18px;
+    padding: 12px 10px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+    text-align: center;
+  }
+  .uitleg-step:hover { transform: translateY(-3px); box-shadow: 6px 6px 0 rgba(0,0,0,0.2); }
+  .uitleg-step.active-step { transform: translateY(1px); box-shadow: 2px 2px 0 rgba(0,0,0,0.15); }
+  .uitleg-step:nth-child(1) { background: #FFD93D; }
+  .uitleg-step:nth-child(2) { background: #4D96FF; color: white; }
+  .uitleg-step:nth-child(3) { background: #FF9A3C; }
+  .uitleg-step:nth-child(4) { background: #C77DFF; color: white; }
+
+  .uitleg-step-icon { font-size: 1.8rem; display: block; margin-bottom: 4px; }
+  .uitleg-step-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .uitleg-step-time {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    display: block;
+  }
+
+  .uitleg-uitleg-box {
+    background: #FFFBE6;
+    border: 3px solid var(--dark);
+    border-radius: 18px;
+    padding: 14px 16px;
+    margin-top: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--dark);
+    line-height: 1.6;
+    text-align: left;
+    display: none;
+  }
+  .uitleg-uitleg-box.show { display: block; }
+  .uitleg-uitleg-box .uitleg-highlight {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    color: var(--coral);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .uitleg-speak {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* Free play time display */
+  .free-time-display {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.8rem;
+    color: var(--dark);
+    background: var(--sun);
+    border: 4px solid var(--dark);
+    border-radius: 20px;
+    padding: 10px 30px;
+    display: inline-block;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.2);
+    margin-bottom: 10px;
+    letter-spacing: 4px;
+    transition: transform 0.15s;
+  }
+  .free-time-display.pulse {
+    animation: timePulse 0.2s ease;
+  }
+  @keyframes timePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+  .free-time-label {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    color: #777;
+    margin-bottom: 6px;
+  }
+  .speak-time-btn {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    background: var(--coral);
+    color: white;
+    border: 3px solid var(--dark);
+    border-radius: 16px;
+    padding: 10px 24px;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+    transition: transform 0.1s;
+    margin-top: 10px;
+  }
+  .speak-time-btn:hover { transform: translateY(-2px); }
+  .speak-time-btn:active { transform: translateY(1px); }
+
+  /* Main card */
+  .card {
+    background: var(--white);
+    border: 4px solid var(--dark);
+    border-radius: 30px;
+    padding: 28px 24px;
+    box-shadow: 8px 8px 0 rgba(0,0,0,0.2);
+    text-align: center;
+  }
+
+  .question-text {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    color: var(--dark);
+    margin-bottom: 20px;
+    min-height: 2.5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Clock */
+  .clock-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  #clockCanvas {
+    border-radius: 50%;
+    cursor: default;
+    touch-action: none;
+    filter: drop-shadow(6px 6px 0 rgba(0,0,0,0.15));
+  }
+
+  #clockCanvas.draggable { cursor: grab; }
+  #clockCanvas.dragging { cursor: grabbing; }
+
+  /* Answer section */
+  .answer-section {
+    margin-top: 8px;
+  }
+
+  /* Time options grid */
+  .time-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .time-option {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    padding: 14px 8px;
+    border: 3px solid var(--dark);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: transform 0.1s;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+    color: var(--dark);
+  }
+
+  .time-option:hover { transform: scale(1.05); }
+  .time-option:active { transform: scale(0.97); }
+  .time-option.correct { background: #6BCB77 !important; border-color: #2d7a3a; }
+  .time-option.wrong { background: #FF6B6B !important; border-color: #a02020; }
+
+  .time-option:nth-child(1) { background: #FFD93D; }
+  .time-option:nth-child(2) { background: #4D96FF; color: white; }
+  .time-option:nth-child(3) { background: #FF9A3C; }
+  .time-option:nth-child(4) { background: #C77DFF; color: white; }
+  .time-option:nth-child(5) { background: #6BCB77; }
+  .time-option:nth-child(6) { background: #FF6B6B; color: white; }
+
+  /* Drag instruction */
+  .drag-hint {
+    font-size: 1rem;
+    color: #888;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  .check-btn {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    background: var(--blue);
+    color: white;
+    border: 3px solid var(--dark);
+    border-radius: 20px;
+    padding: 14px 40px;
+    cursor: pointer;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.25);
+    transition: transform 0.1s;
+    margin-top: 8px;
+  }
+  .check-btn:hover { transform: translateY(-2px); }
+  .check-btn:active { transform: translateY(2px); box-shadow: 2px 2px 0 rgba(0,0,0,0.25); }
+
+  /* Feedback */
+  .feedback {
+    margin-top: 16px;
+    padding: 14px 20px;
+    border-radius: 20px;
+    border: 3px solid var(--dark);
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .feedback.show { opacity: 1; }
+  .feedback.good { background: #AFFFB8; color: #1a6b2a; }
+  .feedback.bad { background: #FFD4D4; color: #8b1a1a; }
+
+  /* Confetti */
+  .confetti-piece {
+    position: fixed;
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 999;
+    animation: confettiFall 1.2s ease-in forwards;
+  }
+
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+    100% { transform: translateY(500px) rotate(720deg) scale(0.5); opacity: 0; }
+  }
+
+  /* Speech btn */
+  .speak-btn {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: transform 0.2s;
+    vertical-align: middle;
+  }
+  .speak-btn:hover { transform: scale(1.2); }
+
+  /* Next btn */
+  .next-btn {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    background: var(--coral);
+    color: white;
+    border: 3px solid var(--dark);
+    border-radius: 20px;
+    padding: 12px 36px;
+    cursor: pointer;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.25);
+    margin-top: 12px;
+    display: none;
+    transition: transform 0.1s;
+  }
+  .next-btn:hover { transform: translateY(-2px); }
+  .next-btn.show { display: inline-block; }
+
+  /* Level badge */
+  .level-tag {
+    display: inline-block;
+    background: var(--sun);
+    border: 2px solid var(--dark);
+    border-radius: 10px;
+    padding: 3px 10px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--dark);
+    margin-bottom: 12px;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: rgba(0,0,0,0.4);
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<div class="cloud cloud-1"></div>
+<div class="cloud cloud-2"></div>
+<div class="cloud cloud-3"></div>
+
+<div class="app">
+  <header>
+    <div class="title">🕐 Klokkijken <span>Leren!</span></div>
+    <div class="score-bar">
+      <div class="score-badge">⭐ Score: <span id="scoreNum">0</span></div>
+      <div class="stars-display" id="starsDisplay"></div>
+    </div>
+  </header>
+
+  <div class="mode-selector">
+    <button class="mode-btn active" onclick="setMode('lezen')">🔍 Hoe laat is het?</button>
+    <button class="mode-btn" onclick="setMode('instellen')">🖐️ Zet de klok!</button>
+    <button class="mode-btn" onclick="setMode('basis')">🌟 Hele uren</button>
+    <button class="mode-btn" onclick="setMode('vrij')">🎨 Speel zelf!</button>
+    <button class="mode-btn" onclick="setMode('uitleg')">📖 Uitleg</button>
+  </div>
+
+  <div class="card">
+    <div class="level-tag" id="levelTag">Niveau 1</div>
+    <div class="question-text" id="questionText">Klaar om te beginnen? 🎉</div>
+
+    <div class="clock-wrap">
+      <canvas id="clockCanvas" width="260" height="260"></canvas>
+    </div>
+
+    <div class="answer-section" id="answerSection"></div>
+
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Volgende vraag →</button>
+  </div>
+
+  <footer>Gemaakt met ❤️ voor kleine tijdreizigers</footer>
+</div>
+
+<script>
+const canvas = document.getElementById('clockCanvas');
+const ctx = canvas.getContext('2d');
+const CX = 130, CY = 130, R = 115;
+
+let mode = 'lezen';
+let score = 0;
+let answered = false;
+let correctHour = 0, correctMinute = 0;
+let displayHour = 0, displayMinute = 0;
+let dragging = null;
+
+// ---- CLOCK DRAWING ----
+function drawClock(h, m) {
+  ctx.clearRect(0, 0, 260, 260);
+
+  // Shadow
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.15)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetX = 4;
+  ctx.shadowOffsetY = 4;
+
+  // Face
+  const grad = ctx.createRadialGradient(CX-20, CY-20, 10, CX, CY, R);
+  grad.addColorStop(0, '#FFFDF7');
+  grad.addColorStop(1, '#FFF0D0');
+  ctx.beginPath();
+  ctx.arc(CX, CY, R, 0, Math.PI*2);
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.restore();
+
+  // Rim
+  ctx.beginPath();
+  ctx.arc(CX, CY, R, 0, Math.PI*2);
+  ctx.strokeStyle = '#3D2B1F';
+  ctx.lineWidth = 6;
+  ctx.stroke();
+
+  // Colored segments (decorative)
+  const segColors = ['#FFD93D','#FF9A3C','#FF6B6B','#C77DFF','#4D96FF','#6BCB77'];
+  for(let i=0; i<12; i++) {
+    ctx.beginPath();
+    ctx.moveTo(CX, CY);
+    ctx.arc(CX, CY, R-6, (i*30-90)*Math.PI/180, ((i+1)*30-90)*Math.PI/180);
+    ctx.closePath();
+    ctx.fillStyle = segColors[i%6] + '25';
+    ctx.fill();
+  }
+
+  // Hour tick marks
+  for(let i=0; i<60; i++) {
+    const angle = (i*6 - 90) * Math.PI/180;
+    const isHour = i % 5 === 0;
+    const r1 = R - (isHour ? 18 : 10);
+    const r2 = R - 4;
+    ctx.beginPath();
+    ctx.moveTo(CX + Math.cos(angle)*r1, CY + Math.sin(angle)*r1);
+    ctx.lineTo(CX + Math.cos(angle)*r2, CY + Math.sin(angle)*r2);
+    ctx.strokeStyle = isHour ? '#3D2B1F' : '#ccc';
+    ctx.lineWidth = isHour ? 3 : 1.5;
+    ctx.stroke();
+  }
+
+  // Hour numbers
+  ctx.font = 'bold 20px Fredoka One, sans-serif';
+  ctx.fillStyle = '#3D2B1F';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  for(let i=1; i<=12; i++) {
+    const angle = (i*30 - 90) * Math.PI/180;
+    const nr = R - 34;
+    ctx.fillText(i, CX + Math.cos(angle)*nr, CY + Math.sin(angle)*nr);
+  }
+
+  // Minute hand
+  const mAngle = (m*6 - 90) * Math.PI/180;
+  drawHand(mAngle, 80, 6, '#4D96FF', '#3D2B1F');
+
+  // Hour hand
+  const hAngle = ((h % 12)*30 + m*0.5 - 90) * Math.PI/180;
+  drawHand(hAngle, 52, 9, '#FF6B6B', '#3D2B1F');
+
+  // Center dot
+  ctx.beginPath();
+  ctx.arc(CX, CY, 10, 0, Math.PI*2);
+  ctx.fillStyle = '#3D2B1F';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(CX, CY, 6, 0, Math.PI*2);
+  ctx.fillStyle = '#FFD93D';
+  ctx.fill();
+}
+
+function drawHand(angle, length, width, color, outline) {
+  ctx.save();
+  ctx.translate(CX, CY);
+  ctx.rotate(angle);
+  ctx.lineCap = 'round';
+
+  // Outline
+  ctx.beginPath();
+  ctx.moveTo(-12, 0);
+  ctx.lineTo(length, 0);
+  ctx.strokeStyle = outline;
+  ctx.lineWidth = width + 3;
+  ctx.stroke();
+
+  // Fill
+  ctx.beginPath();
+  ctx.moveTo(-12, 0);
+  ctx.lineTo(length, 0);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+// ---- TIME HELPERS ----
+function timeLabel(h, m) {
+  if(m === 0) return `${h} uur`;
+  if(m === 30) return `half ${h === 12 ? 1 : h+1}`;
+  if(m === 15) return `kwart over ${h}`;
+  if(m === 45) return `kwart voor ${h === 12 ? 1 : h+1}`;
+  if(m < 30) return `${m} over ${h}`;
+  return `${60-m} voor ${h === 12 ? 1 : h+1}`;
+}
+
+function timeLabelShort(h, m) {
+  const hh = String(h).padStart(2,'0');
+  const mm = String(m).padStart(2,'0');
+  return `${hh}:${mm}`;
+}
+
+// ---- MODES ----
+function setMode(m) {
+  mode = m;
+  answered = false;
+  document.querySelectorAll('.mode-btn').forEach((b,i) => b.classList.remove('active'));
+  event.target.classList.add('active');
+  setupDrag(false);
+  nextQuestion();
+}
+
+function nextQuestion() {
+  answered = false;
+  document.getElementById('feedback').classList.remove('show','good','bad');
+  document.getElementById('nextBtn').classList.remove('show');
+
+  if(mode === 'lezen') questionLezen();
+  else if(mode === 'instellen') questionInstellen();
+  else if(mode === 'vrij') questionVrij();
+  else if(mode === 'uitleg') questionUitleg();
+  else questionBasis();
+}
+
+// Mode 4: Free play — drag hands freely, clock shows the time
+function questionVrij() {
+  displayHour = 12; displayMinute = 0;
+  drawClock(displayHour, displayMinute);
+  setupDragFree();
+
+  document.getElementById('levelTag').textContent = 'Speel zelf! 🎨';
+  document.getElementById('questionText').textContent = 'Zet de klok op een tijd die jij wilt! 🕐';
+
+  document.getElementById('answerSection').innerHTML = `
+    <p class="free-time-label">Jouw tijd:</p>
+    <div class="free-time-display" id="freeTimeDisplay">12:00</div><br>
+    <p class="free-time-label" id="freeTimeLabelNL">twaalf uur</p>
+    <br>
+    <button class="speak-time-btn" onclick="speakFreeTime()">🔊 Hoor de tijd!</button>
+  `;
+}
+
+function updateFreeDisplay() {
+  const el = document.getElementById('freeTimeDisplay');
+  const labelEl = document.getElementById('freeTimeLabelNL');
+  if(!el) return;
+  const hh = String(displayHour).padStart(2,'0');
+  const mm = String(displayMinute).padStart(2,'0');
+  el.textContent = `${hh}:${mm}`;
+  el.classList.remove('pulse');
+  void el.offsetWidth; // reflow to retrigger animation
+  el.classList.add('pulse');
+  if(labelEl) labelEl.textContent = timeLabel(displayHour, displayMinute);
+}
+
+function speakFreeTime() {
+  speak(timeLabel(displayHour, displayMinute));
+}
+
+function setupDragFree() {
+  // Remove any old listeners first
+  setupDrag(false);
+  canvas.classList.add('draggable');
+  canvas.addEventListener('mousedown', onDragStartFree);
+  canvas.addEventListener('touchstart', onDragStartFree, {passive:false});
+  window.addEventListener('mousemove', onDragMoveFree);
+  window.addEventListener('touchmove', onDragMoveFree, {passive:false});
+  window.addEventListener('mouseup', onDragEndFree);
+  window.addEventListener('touchend', onDragEndFree);
+}
+
+function onDragStartFree(e) {
+  e.preventDefault();
+  const pos = getPos(e);
+  const angle = angleToDeg(pos.x, pos.y);
+  const mAngle = displayMinute*6;
+  const hAngle = (displayHour%12)*30 + displayMinute*0.5;
+  const mDiff = Math.abs(((angle - mAngle + 540)%360)-180);
+  const hDiff = Math.abs(((angle - hAngle + 540)%360)-180);
+  dragTarget = mDiff < hDiff ? 'minute' : 'hour';
+  isDragging = true;
+  canvas.classList.add('dragging');
+}
+
+function onDragMoveFree(e) {
+  if(!isDragging) return;
+  e.preventDefault();
+  const pos = getPos(e);
+  let angle = angleToDeg(pos.x, pos.y);
+  angle = (angle + 360) % 360;
+
+  if(dragTarget === 'minute') {
+    const prevMinute = displayMinute;
+    const newMinute = Math.round(angle/6) % 60;
+
+    // Detect crossing 0 (59->0 = forward, 0->59 = backward)
+    const crossedForward  = prevMinute > 45 && newMinute < 15;
+    const crossedBackward = prevMinute < 15 && newMinute > 45;
+
+    if(crossedForward) {
+      displayHour = (displayHour % 12) + 1;
+      if(displayHour > 12) displayHour = 1;
+    } else if(crossedBackward) {
+      displayHour = displayHour - 1;
+      if(displayHour < 1) displayHour = 12;
+    }
+
+    displayMinute = newMinute < 0 ? newMinute + 60 : newMinute;
+  } else {
+    const rawH = angle / 30;
+    displayHour = Math.round(rawH) % 12;
+    if(displayHour === 0) displayHour = 12;
+  }
+  drawClock(displayHour, displayMinute);
+  updateFreeDisplay();
+}
+
+function onDragEndFree(e) {
+  isDragging = false;
+  canvas.classList.remove('dragging');
+}
+
+function randomTime(onlyWhole) {
+  const h = Math.floor(Math.random()*12)+1;
+  let m;
+  if(onlyWhole) m = 0;
+  else {
+    const opts = [0,5,10,15,20,25,30,35,40,45,50,55];
+    m = opts[Math.floor(Math.random()*opts.length)];
+  }
+  return {h, m};
+}
+
+// Mode 1: Read the clock
+function questionLezen() {
+  const t = randomTime(false);
+  correctHour = t.h; correctMinute = t.m;
+  displayHour = t.h; displayMinute = t.m;
+  drawClock(t.h, t.m);
+  setupDrag(false);
+
+  document.getElementById('levelTag').textContent = 'Hoe laat is het? 🔍';
+  document.getElementById('questionText').innerHTML = 'Hoe laat is het op deze klok? <button class="speak-btn" onclick="speak(\''+timeLabel(t.h,t.m)+'\')" title="Hoor het antwoord">🔊</button>';
+
+  // Generate wrong answers
+  const correct = timeLabel(t.h, t.m);
+  const wrongs = generateWrongLabels(t.h, t.m, 5);
+  const all = shuffle([correct, ...wrongs.slice(0,5)]);
+
+  let html = '<div class="time-options">';
+  all.forEach(opt => {
+    html += `<button class="time-option" onclick="checkAnswer(this,'${opt}','${correct}')">${opt}</button>`;
+  });
+  html += '</div>';
+  document.getElementById('answerSection').innerHTML = html;
+}
+
+// Mode 2: Set the clock
+function questionInstellen() {
+  const t = randomTime(false);
+  correctHour = t.h; correctMinute = t.m;
+  displayHour = 12; displayMinute = 0;
+  drawClock(12, 0);
+  setupDrag(true);
+
+  const label = timeLabel(t.h, t.m);
+  document.getElementById('levelTag').textContent = 'Zet de klok goed! 🖐️';
+  document.getElementById('questionText').innerHTML =
+    `Zet de klok op <b>${label}</b> <button class="speak-btn" onclick="speak('${label}')" title="Hoor de tijd">🔊</button>`;
+
+  document.getElementById('answerSection').innerHTML =
+    '<p class="drag-hint">Sleep de wijzers naar de juiste stand 🖐️</p>' +
+    '<button class="check-btn" onclick="checkDrag()">✅ Controleer!</button>';
+}
+
+// Mode 3: Whole hours
+function questionBasis() {
+  const t = randomTime(true);
+  correctHour = t.h; correctMinute = 0;
+  displayHour = t.h; displayMinute = 0;
+  drawClock(t.h, 0);
+  setupDrag(false);
+
+  document.getElementById('levelTag').textContent = 'Hele uren 🌟';
+  document.getElementById('questionText').innerHTML = 'Hoe laat is het? 🕐';
+
+  const correct = `${t.h} uur`;
+  const wrongHours = [];
+  let candidates = Array.from({length:12},(_,i)=>i+1).filter(x=>x!==t.h);
+  candidates = shuffle(candidates).slice(0,5);
+  const wrongs = candidates.map(x => `${x} uur`);
+  const all = shuffle([correct, ...wrongs]);
+
+  let html = '<div class="time-options">';
+  all.forEach(opt => {
+    html += `<button class="time-option" onclick="checkAnswer(this,'${opt}','${correct}')">${opt}</button>`;
+  });
+  html += '</div>';
+  document.getElementById('answerSection').innerHTML = html;
+}
+
+function generateWrongLabels(h, m, count) {
+  const results = new Set();
+  const valid_m = [0,5,10,15,20,25,30,35,40,45,50,55];
+  while(results.size < count) {
+    const wh = Math.floor(Math.random()*12)+1;
+    const wm = valid_m[Math.floor(Math.random()*valid_m.length)];
+    if(wh === h && wm === m) continue;
+    const lbl = timeLabel(wh, wm);
+    if(lbl !== timeLabel(h,m)) results.add(lbl);
+  }
+  return [...results];
+}
+
+// ---- ANSWER CHECK ----
+function checkAnswer(btn, chosen, correct) {
+  if(answered) return;
+  answered = true;
+
+  const all = document.querySelectorAll('.time-option');
+  all.forEach(b => b.disabled = true);
+
+  if(chosen === correct) {
+    btn.classList.add('correct');
+    showFeedback(true);
+    addScore(10);
+  } else {
+    btn.classList.add('wrong');
+    // Show correct
+    all.forEach(b => { if(b.textContent === correct) b.classList.add('correct'); });
+    showFeedback(false);
+  }
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+function checkDrag() {
+  if(answered) return;
+  answered = true;
+
+  const hDiff = Math.abs(displayHour - correctHour);
+  const mDiff = Math.abs(displayMinute - correctMinute);
+  const hOk = hDiff <= 0 || hDiff === 12;
+  const mOk = mDiff <= 5;
+
+  if(hOk && mOk) {
+    showFeedback(true);
+    addScore(15);
+  } else {
+    showFeedback(false);
+    // Show correct
+    displayHour = correctHour; displayMinute = correctMinute;
+    drawClock(correctHour, correctMinute);
+  }
+  setupDrag(false);
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+// ---- FEEDBACK ----
+function showFeedback(correct) {
+  const el = document.getElementById('feedback');
+  const goods = ['Super goed! 🎉','Geweldig! ⭐','Bravo! 🌟','Ja! Klopt helemaal! 🎊','Top! 👏'];
+  const bads = ['Bijna! Probeer nog eens 💪','Niet helemaal... probeer nog eens! 🙈','Oeps! Maar goed geprobeerd! 🌈'];
+
+  el.textContent = correct
+    ? goods[Math.floor(Math.random()*goods.length)]
+    : bads[Math.floor(Math.random()*bads.length)];
+
+  el.className = 'feedback show ' + (correct ? 'good' : 'bad');
+  if(correct) launchConfetti();
+}
+
+// ---- SCORE ----
+function addScore(pts) {
+  score += pts;
+  document.getElementById('scoreNum').textContent = score;
+  const stars = Math.min(5, Math.floor(score/20));
+  document.getElementById('starsDisplay').textContent = '⭐'.repeat(stars);
+}
+
+// ---- CONFETTI ----
+function launchConfetti() {
+  const colors = ['#FFD93D','#FF6B6B','#6BCB77','#4D96FF','#C77DFF','#FF9A3C'];
+  for(let i=0; i<40; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.cssText = `
+      left: ${Math.random()*100}vw;
+      top: ${Math.random()*40 + 10}vh;
+      background: ${colors[Math.floor(Math.random()*colors.length)]};
+      animation-delay: ${Math.random()*0.5}s;
+      transform: rotate(${Math.random()*360}deg);
+      border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+    `;
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 1500);
+  }
+}
+
+// ---- SPEECH ----
+function speak(text) {
+  if(!window.speechSynthesis) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'nl-NL';
+  u.rate = 0.85;
+  u.pitch = 1.1;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+
+// ---- DRAG ----
+let isDragging = false;
+let dragTarget = null; // 'hour' or 'minute'
+
+function setupDrag(enable) {
+  if(enable) {
+    canvas.classList.add('draggable');
+    canvas.addEventListener('mousedown', onDragStart);
+    canvas.addEventListener('touchstart', onDragStart, {passive:false});
+    window.addEventListener('mousemove', onDragMove);
+    window.addEventListener('touchmove', onDragMove, {passive:false});
+    window.addEventListener('mouseup', onDragEnd);
+    window.addEventListener('touchend', onDragEnd);
+  } else {
+    canvas.classList.remove('draggable','dragging');
+    canvas.removeEventListener('mousedown', onDragStart);
+    canvas.removeEventListener('touchstart', onDragStart);
+    window.removeEventListener('mousemove', onDragMove);
+    window.removeEventListener('touchmove', onDragMove);
+    window.removeEventListener('mouseup', onDragEnd);
+    window.removeEventListener('touchend', onDragEnd);
+  }
+}
+
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  return {
+    x: (clientX - rect.left) * scaleX,
+    y: (clientY - rect.top) * scaleY
+  };
+}
+
+function angleToDeg(x, y) {
+  return Math.atan2(y - CY, x - CX) * 180/Math.PI + 90;
+}
+
+function onDragStart(e) {
+  if(answered) return;
+  e.preventDefault();
+  const pos = getPos(e);
+  const angle = angleToDeg(pos.x, pos.y);
+
+  // Determine closest hand
+  const mAngle = displayMinute*6;
+  const hAngle = (displayHour%12)*30 + displayMinute*0.5;
+
+  const mDiff = Math.abs(((angle - mAngle + 540)%360)-180);
+  const hDiff = Math.abs(((angle - hAngle + 540)%360)-180);
+
+  dragTarget = mDiff < hDiff ? 'minute' : 'hour';
+  isDragging = true;
+  canvas.classList.add('dragging');
+}
+
+function onDragMove(e) {
+  if(!isDragging || answered) return;
+  e.preventDefault();
+  const pos = getPos(e);
+  let angle = angleToDeg(pos.x, pos.y);
+  if(angle < 0) angle += 360;
+  angle = (angle + 360) % 360;
+
+  if(dragTarget === 'minute') {
+    displayMinute = Math.round(angle/6) % 60;
+    if(displayMinute < 0) displayMinute += 60;
+  } else {
+    const rawH = angle / 30;
+    displayHour = Math.round(rawH) % 12;
+    if(displayHour === 0) displayHour = 12;
+  }
+  drawClock(displayHour, displayMinute);
+}
+
+function onDragEnd(e) {
+  isDragging = false;
+  canvas.classList.remove('dragging');
+}
+
+// ---- UTILS ----
+function shuffle(arr) {
+  for(let i=arr.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+// ---- UITLEG MODE ----
+let uitlegUur = 0;  // 0–23
+let uitlegStap = null; // 'heel','kwartover','half','kwartvoor'
+
+function questionUitleg() {
+  setupDrag(false);
+  document.getElementById('levelTag').textContent = 'Uitleg 📖';
+  document.getElementById('nextBtn').classList.remove('show');
+  document.getElementById('feedback').classList.remove('show','good','bad');
+  uitlegStap = null;
+  renderUitleg();
+}
+
+function renderUitleg() {
+  document.getElementById('questionText').textContent = 'Kies een uur en een soort tijd 👇';
+
+  const uurDisplay = uitlegUur; // 0–23
+  const clockHour = uitlegUur % 12 || 12; // analoge klokpositie 1–12
+  const nextUur = (uitlegUur + 1) % 24;
+  const nextClockHour = nextUur % 12 || 12;
+  const hh = String(uurDisplay).padStart(2,'0');
+  const hhNext = String(nextUur).padStart(2,'0');
+
+  // Spoken labels — use 24h phrasing
+  const spokenHeel = `${uurDisplay} uur`;
+  const spokenKwartover = `kwart over ${uurDisplay}`;
+  const spokenHalf = `half ${nextUur === 0 ? 'nul' : nextUur}`;
+  const spokenKwartvoor = `kwart voor ${nextUur === 0 ? 'nul' : nextUur}`;
+
+  const stappen = [
+    {
+      key: 'heel',
+      icon: '🕛',
+      title: 'Heel uur',
+      time: `${hh}:00`,
+      label: spokenHeel,
+      uitleg: `Bij een <b>heel uur</b> wijst de kleine wijzer precies op <b>${clockHour}</b> en de grote wijzer staat op de <b>12</b>. De klok zegt: <b>${hh}:00</b>.`,
+      h: clockHour, m: 0
+    },
+    {
+      key: 'kwartover',
+      icon: '🕒',
+      title: 'Kwart over',
+      time: `${hh}:15`,
+      label: spokenKwartover,
+      uitleg: `Bij <b>kwart over</b> wijst de grote wijzer op de <b>3</b>. De kleine wijzer staat net voorbij de <b>${clockHour}</b>. De klok zegt: <b>${hh}:15</b>.`,
+      h: clockHour, m: 15
+    },
+    {
+      key: 'half',
+      icon: '🕧',
+      title: 'Half',
+      time: `${hh}:30`,
+      label: spokenHalf,
+      uitleg: `Bij <b>half</b> wijst de grote wijzer op de <b>6</b>. De kleine wijzer staat halverwege de <b>${clockHour}</b> en de <b>${nextClockHour}</b>. De klok zegt: <b>${hh}:30</b>. We zeggen: half ${nextUur === 0 ? 'nul' : nextUur}.`,
+      h: clockHour, m: 30
+    },
+    {
+      key: 'kwartvoor',
+      icon: '🕘',
+      title: 'Kwart voor',
+      time: `${hh}:45`,
+      label: spokenKwartvoor,
+      uitleg: `Bij <b>kwart voor</b> wijst de grote wijzer op de <b>9</b>. De kleine wijzer staat vlak voor de <b>${nextClockHour}</b>. De klok zegt: <b>${hh}:45</b>. We zeggen: kwart voor ${nextUur === 0 ? 'nul' : nextUur}.`,
+      h: clockHour, m: 45
+    }
+  ];
+
+  const activeStap = stappen.find(s => s.key === uitlegStap);
+  if(activeStap) {
+    drawClock(activeStap.h, activeStap.m);
+  } else {
+    drawClock(clockHour, 0);
+  }
+
+  // Dag/nacht indicator
+  const isDag = uurDisplay >= 6 && uurDisplay < 20;
+  const isNacht = uurDisplay < 6 || uurDisplay >= 22;
+  const dagNachtIcon = isNacht ? '🌙 nacht' : (uurDisplay < 12 ? '🌅 ochtend' : (uurDisplay < 18 ? '☀️ middag' : '🌆 avond'));
+
+  let stepsHTML = '<div class="uitleg-steps">';
+  stappen.forEach(s => {
+    const isActive = uitlegStap === s.key;
+    stepsHTML += `
+      <div class="uitleg-step${isActive ? ' active-step' : ''}" onclick="selectUitlegStap('${s.key}')">
+        <span class="uitleg-step-icon">${s.icon}</span>
+        <span class="uitleg-step-title">${s.title}</span>
+        <span class="uitleg-step-time">${s.time}</span>
+      </div>`;
+  });
+  stepsHTML += '</div>';
+
+  let uitlegBoxHTML = '';
+  if(activeStap) {
+    uitlegBoxHTML = `
+      <div class="uitleg-uitleg-box show">
+        <span class="uitleg-highlight">🕐 ${activeStap.time} — ${activeStap.label} <button class="uitleg-speak" onclick="speak('${activeStap.label}')" title="Hoor het">🔊</button></span>
+        ${activeStap.uitleg}
+      </div>`;
+  } else {
+    uitlegBoxHTML = `<div class="uitleg-uitleg-box show" style="color:#aaa; font-style:italic;">Klik op een vakje om de uitleg te zien! 👆</div>`;
+  }
+
+  document.getElementById('answerSection').innerHTML = `
+    <div class="uitleg-uur-picker">
+      <button class="uur-nav" onclick="changeUitlegUur(-1)">◀</button>
+      <span class="uur-label">${hh}:00 <span style="font-size:0.85rem; color:#888;">${dagNachtIcon}</span></span>
+      <button class="uur-nav" onclick="changeUitlegUur(1)">▶</button>
+    </div>
+    ${stepsHTML}
+    ${uitlegBoxHTML}
+  `;
+}
+
+function selectUitlegStap(key) {
+  uitlegStap = uitlegStap === key ? null : key;
+  renderUitleg();
+}
+
+function changeUitlegUur(delta) {
+  uitlegUur = (uitlegUur + delta + 24) % 24;
+  uitlegStap = null;
+  renderUitleg();
+}
+
+// ---- INIT ----
+drawClock(12, 0);
+nextQuestion();
+</script>
+</body>
+</html>
