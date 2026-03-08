@@ -739,8 +739,22 @@ function onDragMoveFree(e) {
   angle = (angle + 360) % 360;
 
   if(dragTarget === 'minute') {
-    displayMinute = Math.round(angle/6) % 60;
-    if(displayMinute < 0) displayMinute += 60;
+    const prevMinute = displayMinute;
+    const newMinute = Math.round(angle/6) % 60;
+
+    // Detect crossing 0 (59->0 = forward, 0->59 = backward)
+    const crossedForward  = prevMinute > 45 && newMinute < 15;
+    const crossedBackward = prevMinute < 15 && newMinute > 45;
+
+    if(crossedForward) {
+      displayHour = (displayHour % 12) + 1;
+      if(displayHour > 12) displayHour = 1;
+    } else if(crossedBackward) {
+      displayHour = displayHour - 1;
+      if(displayHour < 1) displayHour = 12;
+    }
+
+    displayMinute = newMinute < 0 ? newMinute + 60 : newMinute;
   } else {
     const rawH = angle / 30;
     displayHour = Math.round(rawH) % 12;
